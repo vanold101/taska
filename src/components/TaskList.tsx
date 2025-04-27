@@ -45,7 +45,7 @@ const TaskList: React.FC = () => {
         </h3>
         <Progress value={completionPercentage} className="h-2 mb-2" />
         <p className="text-xs text-muted-foreground">
-          You've completed {completedPercentage}% of your tasks
+          You've completed {completionPercentage}% of your tasks
           {completedCount > 0 && (
             <span className="text-primary font-medium"> • Great job!</span>
           )}

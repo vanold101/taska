@@ -4,20 +4,20 @@ import { MapPin, Navigation } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-// Columbus, Ohio coordinates
-const COLUMBUS_CENTER = [-82.9988, 39.9612];
+// Columbus, Ohio coordinates as [longitude, latitude] tuple
+const COLUMBUS_CENTER: [number, number] = [-82.9988, 39.9612];
 
 // Sample store locations around Columbus
 const STORE_LOCATIONS = [
-  { name: "Kroger - Dublin", coordinates: [-83.1140, 40.0992], tasks: 3 },
-  { name: "Target - Easton", coordinates: [-82.9179, 40.0515], tasks: 2 },
-  { name: "Whole Foods - Upper Arlington", coordinates: [-83.0620, 40.0266], tasks: 1 },
-  { name: "Walmart Supercenter", coordinates: [-82.9625, 39.9420], tasks: 4 },
-  { name: "Trader Joe's", coordinates: [-83.0204, 40.0559], tasks: 2 }
+  { name: "Kroger - Dublin", coordinates: [-83.1140, 40.0992] as [number, number], tasks: 3 },
+  { name: "Target - Easton", coordinates: [-82.9179, 40.0515] as [number, number], tasks: 2 },
+  { name: "Whole Foods - Upper Arlington", coordinates: [-83.0620, 40.0266] as [number, number], tasks: 1 },
+  { name: "Walmart Supercenter", coordinates: [-82.9625, 39.9420] as [number, number], tasks: 4 },
+  { name: "Trader Joe's", coordinates: [-83.0204, 40.0559] as [number, number], tasks: 2 }
 ];
 
 // Temporary user location (can be anywhere)
-const USER_LOCATION = [-83.0007, 39.9614]; // Downtown Columbus
+const USER_LOCATION: [number, number] = [-83.0007, 39.9614]; // Downtown Columbus
 
 const TaskMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
