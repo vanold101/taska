@@ -5,8 +5,9 @@ import TaskItem from './TaskItem';
 import { Task } from '../types';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, Star, Award } from 'lucide-react';
+import { MapPin, Star, Award, Sparkles } from 'lucide-react';
 import TaskMap from './TaskMap';
+import { Progress } from '@/components/ui/progress';
 
 const TaskList: React.FC = () => {
   const { tasks } = useTaskContext();
@@ -28,12 +29,33 @@ const TaskList: React.FC = () => {
     tasksByLocation[locationName].push(task);
   });
 
+  // Calculate completion percentage
+  const completedCount = tasks.filter(task => task.completed).length;
+  const completionPercentage = tasks.length > 0 
+    ? Math.round((completedCount / tasks.length) * 100) 
+    : 0;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Progress Stats */}
+      <div className="bg-primary/5 rounded-lg p-4 border border-primary/10 shadow-sm">
+        <h3 className="text-sm font-medium flex items-center gap-2 mb-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          Task Progress
+        </h3>
+        <Progress value={completionPercentage} className="h-2 mb-2" />
+        <p className="text-xs text-muted-foreground">
+          You've completed {completedPercentage}% of your tasks
+          {completedCount > 0 && (
+            <span className="text-primary font-medium"> • Great job!</span>
+          )}
+        </p>
+      </div>
+      
       <TaskMap />
       
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid grid-cols-3 w-full mb-4">
+        <TabsList className="grid grid-cols-3 w-full mb-6">
           <TabsTrigger 
             value="all" 
             onClick={() => setFilter('all')}
@@ -62,11 +84,11 @@ const TaskList: React.FC = () => {
         <TabsContent value="all" className="space-y-6 mt-2">
           {Object.entries(tasksByLocation).map(([location, locationTasks]) => (
             <div key={location} className="space-y-2">
-              <h3 className="text-lg font-medium flex items-center gap-2">
+              <h3 className="text-md font-medium flex items-center gap-2 px-1">
                 <MapPin className="h-4 w-4 text-primary" />
                 {location}
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {locationTasks.map((task) => (
                   <TaskItem key={task.id} task={task} />
                 ))}
@@ -75,29 +97,29 @@ const TaskList: React.FC = () => {
           ))}
 
           {filteredTasks.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-10 text-muted-foreground">
               No tasks found
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="active" className="space-y-2 mt-2">
+        <TabsContent value="active" className="space-y-3 mt-2">
           {filteredTasks.map((task) => (
             <TaskItem key={task.id} task={task} />
           ))}
           {filteredTasks.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-10 text-muted-foreground">
               No active tasks
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="completed" className="space-y-2 mt-2">
+        <TabsContent value="completed" className="space-y-3 mt-2">
           {filteredTasks.map((task) => (
             <TaskItem key={task.id} task={task} />
           ))}
           {filteredTasks.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-10 text-muted-foreground">
               No completed tasks
             </div>
           )}

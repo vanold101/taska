@@ -1,4 +1,6 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -74,21 +76,132 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium;
+  }
+
+  button {
+    @apply font-semibold;
   }
 }
 
 @layer components {
   .task-item {
-    @apply flex items-center gap-3 p-3 rounded-lg border border-border bg-card
-           transition-all duration-200 hover:shadow-sm hover:border-primary/30;
+    @apply flex items-center gap-3 p-4 rounded-lg border border-border bg-card
+           transition-all duration-300 hover:shadow-md hover:border-primary/30
+           backdrop-filter backdrop-blur-sm;
   }
 
   .task-item.done {
-    @apply bg-muted/50 border-muted;
+    @apply bg-muted/40 border-muted;
+  }
+
+  .task-item.done h3 {
+    @apply line-through opacity-60 transition-opacity duration-300;
   }
 
   .location-badge {
     @apply inline-flex items-center gap-1 text-xs text-muted-foreground 
-           bg-muted px-2 py-1 rounded-full;
+           bg-muted/80 px-2 py-1 rounded-full transition-colors duration-200
+           hover:bg-muted;
+  }
+
+  /* Map Markers */
+  .store-marker {
+    @apply cursor-pointer;
+  }
+  
+  .marker-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0;
+    background: #3b82f6;
+    position: absolute;
+    transform: rotate(-45deg);
+    left: 50%;
+    top: 50%;
+    margin: -15px 0 0 -15px;
+    animation-name: bounce;
+    animation-duration: 0.5s;
+    animation-fill-mode: both;
+  }
+  
+  .marker-pin::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    margin: 5px 0 0 5px;
+    background: #ffffff;
+    position: absolute;
+    border-radius: 50%;
+  }
+
+  .marker-content {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .marker-count {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    color: #3b82f6;
+  }
+
+  .user-marker {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #ef4444;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3), 0 0 12px rgba(239, 68, 68, 0.5);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes bounce {
+    0% {
+      opacity: 0;
+      transform: rotate(-45deg) translateY(40px);
+    }
+    100% {
+      opacity: 1;
+      transform: rotate(-45deg) translateY(0);
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+  }
+
+  /* Button hover animation */
+  button[class*="bg-primary"] {
+    @apply transition-all duration-200 hover:bg-primary/90 hover:shadow-md
+           hover:shadow-primary/20 active:scale-[0.98];
+  }
+
+  /* Task completion effects */
+  button[class*="rounded-full"] {
+    @apply transition-all duration-200;
+  }
+
+  .task-item:hover {
+    @apply transform -translate-y-0.5;
   }
 }

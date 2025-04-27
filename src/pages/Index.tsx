@@ -6,19 +6,22 @@ import AddTaskForm from '@/components/AddTaskForm';
 import TaskList from '@/components/TaskList';
 import TeamHeader from '@/components/TeamHeader';
 import LocationBanner from '@/components/LocationBanner';
-import { Star } from 'lucide-react';
+import { Star, Sparkles } from 'lucide-react';
 
 const Index = () => {
   return (
     <TaskProvider>
-      <div className="container max-w-md mx-auto py-6 px-4">
-        <header className="mb-6 animate-bounce">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Star className="h-8 w-8 text-yellow-400" />
-            <h1 className="text-3xl font-bold text-center">Taska</h1>
-            <Star className="h-8 w-8 text-yellow-400" />
+      <div className="container max-w-md mx-auto py-8 px-4">
+        <header className="mb-8">
+          <div className="flex items-center justify-center gap-2 mb-2 animate-bounce">
+            <Star className="h-8 w-8 text-yellow-400 drop-shadow-md" />
+            <h1 className="text-3xl font-semibold text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Taska</h1>
+            <Star className="h-8 w-8 text-yellow-400 drop-shadow-md" />
           </div>
-          <p className="text-muted-foreground text-center">Level up your productivity!</p>
+          <p className="text-muted-foreground text-center flex items-center justify-center gap-1">
+            <Sparkles className="h-4 w-4 text-primary" />
+            Level up your productivity!
+          </p>
         </header>
         
         <TeamHeader />
@@ -29,8 +32,8 @@ const Index = () => {
         
         <LocationBanner />
         
-        <Card className="overflow-hidden border-2 border-primary/20">
-          <CardContent className="p-4">
+        <Card className="overflow-hidden border-2 border-primary/10 shadow-lg rounded-xl">
+          <CardContent className="p-5">
             <TaskList />
           </CardContent>
         </Card>
