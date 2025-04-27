@@ -6,7 +6,7 @@ import AddTaskForm from '@/components/AddTaskForm';
 import TaskList from '@/components/TaskList';
 import TeamHeader from '@/components/TeamHeader';
 import LocationBanner from '@/components/LocationBanner';
-import { Star, Sparkles } from 'lucide-react';
+import { Star, Sparkles, Map } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -37,6 +37,14 @@ const Index = () => {
             <TaskList />
           </CardContent>
         </Card>
+        
+        <footer className="mt-8 text-center text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-1 mb-1">
+            <Map className="h-3 w-3" />
+            <span>Locations powered by Mapbox</span>
+          </div>
+          <p>© 2025 Taska - Gamify your productivity</p>
+        </footer>
       </div>
     </TaskProvider>
   );
