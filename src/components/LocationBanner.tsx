@@ -1,10 +1,52 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MapPin, Navigation, BellRing } from 'lucide-react';
 import { useTaskContext } from '@/context/TaskContext';
 import { Location, Task } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import styles from './LocationBanner.module.css';
+
+// Fix for leaflet marker icons
+const userIcon = new L.DivIcon({
+  className: 'user-location-marker',
+  html: `<div class="h-4 w-4 bg-primary rounded-full shadow-md border-2 border-white"></div>
+         <div class="absolute h-10 w-10 bg-primary/20 rounded-full -top-3 -left-3 animate-ping"></div>`,
+  iconSize: L.point(10, 10),
+  iconAnchor: L.point(5, 5)
+});
+
+const createLocationIcon = (isNearby: boolean, isActive: boolean) => {
+  const markerColor = isNearby ? 'text-accent' : (isActive ? 'text-primary' : 'text-muted');
+  const animationClass = isNearby ? 'animate-bounce' : '';
+  
+  return new L.DivIcon({
+    className: `location-marker ${animationClass}`,
+    html: `<div class="${markerColor}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </div>`,
+    iconSize: L.point(24, 24),
+    iconAnchor: L.point(12, 24),
+    popupAnchor: L.point(0, -24)
+  });
+};
+
+// Custom component to set the map view to user's location
+const MapCenterAdjuster = ({ center, zoom }: { center: [number, number], zoom: number }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, map, zoom]);
+  
+  return null;
+};
 
 const LocationBanner = () => {
   const { tasks = [], nearbyTasks = [] } = useTaskContext();
@@ -13,147 +55,146 @@ const LocationBanner = () => {
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
   
-  // Extract unique locations from tasks
-  const uniqueLocations: Record<string, Location & { tasks: Task[] }> = {};
+  // Extract unique locations from tasks with valid coordinates
+  const taskLocations = tasks
+    .filter(task => task.location && task.location.coordinates)
+    .reduce((locations, task) => {
+      const locationName = task.location.name;
+      
+      if (!locations[locationName]) {
+        locations[locationName] = {
+          ...task.location,
+          tasks: [],
+          hasActive: false,
+          hasCompleted: false,
+          activeCount: 0,
+          completedCount: 0,
+          isNearby: false
+        };
+      }
+      
+      locations[locationName].tasks.push(task);
+      
+      if (!task.completed) {
+        locations[locationName].hasActive = true;
+        locations[locationName].activeCount += 1;
+      } else {
+        locations[locationName].hasCompleted = true;
+        locations[locationName].completedCount += 1;
+      }
+      
+      // Check if this location has any nearby tasks
+      if (nearbyTasks?.some(nearbyTask => nearbyTask.location.name === locationName)) {
+        locations[locationName].isNearby = true;
+      }
+      
+      return locations;
+    }, {} as Record<string, any>);
   
-  // Group tasks by location name
-  tasks.forEach(task => {
-    const locationName = task.location.name;
-    if (!uniqueLocations[locationName]) {
-      uniqueLocations[locationName] = {
-        ...task.location,
-        tasks: []
-      };
-    }
-    uniqueLocations[locationName].tasks.push(task);
-  });
+  // Convert to array
+  const locationArray = Object.values(taskLocations);
   
-  // Convert to array and add display coordinates
-  const taskLocations = Object.values(uniqueLocations).map((location, index) => {
-    // In a real app, we would use the actual coordinates
-    // For now, we'll assign fixed positions in a circular pattern
-    const totalPositions = Object.keys(uniqueLocations).length;
-    const angle = (index / totalPositions) * 2 * Math.PI;
-    const radius = 30; // % distance from center
-    const centerX = 50;
-    const centerY = 50;
-    
-    // Check if this location has any nearby tasks
-    const hasNearbyTasks = nearbyTasks?.some(task => task.location.name === location.name) || false;
-    
-    return {
-      id: `loc-${index}`,
-      name: location.name,
-      coordinates: location.coordinates,
-      x: centerX + radius * Math.cos(angle), // x position (%)
-      y: centerY + radius * Math.sin(angle), // y position (%)
-      tasks: location.tasks,
-      hasActive: location.tasks.some(task => !task.completed),
-      hasCompleted: location.tasks.some(task => task.completed),
-      activeCount: location.tasks.filter(task => !task.completed).length,
-      completedCount: location.tasks.filter(task => task.completed).length,
-      isNearby: hasNearbyTasks
-    };
-  });
+  // Columbus, OH coordinates (default center)
+  const defaultCenter: [number, number] = [39.9612, -82.9988];
   
-  // For demo purposes, simulate user location is near the first location with nearby tasks
-  const closestLocation = taskLocations.find(loc => loc.isNearby) || 
-                         taskLocations.find(loc => loc.hasActive) || 
-                         taskLocations[0];
+  // For demo purposes, simulate user location as the default center
+  const userLocation = defaultCenter;
   
+  // Find the closest location for demonstration
+  const closestLocation = locationArray.find(loc => loc.isNearby) || 
+                          locationArray.find(loc => loc.hasActive) || 
+                          locationArray[0];
+  
+  if (locationArray.length === 0) {
+    return (
+      <div className="relative h-72 mb-8 rounded-xl overflow-hidden flex items-center justify-center bg-muted/30">
+        <p>No locations with coordinates found.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="relative h-72 mb-8 rounded-xl overflow-hidden premium-card">
-      {/* Static Map Container */}
-      <div className="absolute inset-0 bg-[#e6f4f9] z-0">
-        {/* Map grid for visual reference */}
-        <div className="h-full w-full relative">
-          {/* City name */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#84c9e6] font-display font-medium opacity-20 text-4xl whitespace-nowrap">
-            Columbus, Ohio
-          </div>
+      {/* Leaflet Map Container */}
+      <div className="absolute inset-0 z-0">
+        <MapContainer 
+          className={styles.mapContainer}
+          // @ts-ignore - Props issue with react-leaflet types
+          center={defaultCenter}
+          zoom={12}
+        >
+          <TileLayer
+            // @ts-ignore - Props issue with react-leaflet types
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
           
-          {/* Grid lines */}
-          <div className="grid grid-cols-6 grid-rows-6 h-full w-full opacity-30">
-            {Array.from({ length: 36 }).map((_, i) => (
-              <div key={i} className="border border-[#a8d8eb]"></div>
-            ))}
-          </div>
+          {/* Adjust center based on user location */}
+          <MapCenterAdjuster center={userLocation} zoom={12} />
           
-          {/* Decorative elements */}
-          <div className="absolute top-[30%] left-[20%] w-16 h-16 rounded-full bg-[#cceaf6] opacity-30"></div>
-          <div className="absolute bottom-[25%] right-[25%] w-20 h-20 rounded-full bg-[#cceaf6] opacity-30"></div>
+          {/* User location marker */}
+          <Marker 
+            position={userLocation}
+            // @ts-ignore - Props issue with react-leaflet types
+            icon={userIcon}
+          >
+            <Popup>Your current location</Popup>
+          </Marker>
           
-          {/* Main roads */}
-          <div className="absolute top-[50%] left-0 right-0 h-[2px] bg-[#a8d8eb] opacity-40"></div>
-          <div className="absolute top-0 bottom-0 left-[50%] w-[2px] bg-[#a8d8eb] opacity-40"></div>
-          <div className="absolute top-0 right-0 bottom-[70%] left-[30%] border-b-2 border-r-2 border-[#a8d8eb] opacity-30 rounded-br-3xl"></div>
-          
-          {/* Task location pins */}
-          {taskLocations.map((location) => (
-            <div 
-              key={location.id}
-              className={`absolute z-20 transform -translate-x-1/2 -translate-y-1/2 ${location.id === closestLocation?.id ? 'z-30' : ''}`}
-              style={{ top: `${location.y}%`, left: `${location.x}%` }}
-            >
-              <div className={`relative group ${location.id === closestLocation?.id ? 'scale-110' : ''}`}>
-                <div className={`
-                  ${location.id === closestLocation?.id ? 'text-accent animate-pulse' : 'text-primary/80'}
-                  ${location.isNearby ? 'animate-bounce' : ''}
-                `}>
-                  <MapPin className={`h-5 w-5 drop-shadow-sm ${location.isNearby ? 'filter drop-shadow-md' : ''}`} />
-                </div>
-                <div className="absolute top-5 left-1/2 transform -translate-x-1/2 bg-white p-1.5 px-2.5 rounded text-xs shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                  <div className="font-medium mb-1">{location.name}</div>
-                  {location.activeCount > 0 && (
-                    <div className="flex items-center gap-1 text-[10px] text-primary">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                      <span>{location.activeCount} active task{location.activeCount !== 1 ? 's' : ''}</span>
-                    </div>
-                  )}
-                  {location.completedCount > 0 && (
-                    <div className="flex items-center gap-1 text-[10px] text-success">
-                      <div className="w-1.5 h-1.5 bg-success rounded-full" />
-                      <span>{location.completedCount} completed</span>
-                    </div>
-                  )}
-                  {location.isNearby && (
-                    <div className="flex items-center gap-1 text-[10px] text-accent mt-1">
-                      <div className="w-1.5 h-1.5 bg-accent rounded-full" />
-                      <span>You are nearby!</span>
-                    </div>
-                  )}
-                </div>
-                {location.id === closestLocation?.id && (
-                  <span className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-[10px] font-semibold bg-accent/90 text-white py-0.5 px-1.5 rounded-full whitespace-nowrap">
-                    Closest
-                  </span>
+          {/* Task location markers */}
+          {locationArray.map((location, index) => {
+            // Skip locations without coordinates
+            if (!location.coordinates || !location.coordinates.latitude || !location.coordinates.longitude) {
+              return null;
+            }
+            
+            const position: [number, number] = [location.coordinates.latitude, location.coordinates.longitude];
+            const locationIcon = createLocationIcon(location.isNearby, location.hasActive);
+            
+            return (
+              <React.Fragment key={`loc-${index}`}>
+                {/* Location marker */}
+                <Marker 
+                  position={position}
+                  // @ts-ignore - Props issue with react-leaflet types
+                  icon={locationIcon}
+                >
+                  <Popup>
+                    <div className="font-medium mb-1">{location.name}</div>
+                    {location.activeCount > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-primary">
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                        <span>{location.activeCount} active task{location.activeCount !== 1 ? 's' : ''}</span>
+                      </div>
+                    )}
+                    {location.completedCount > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-success">
+                        <div className="w-1.5 h-1.5 bg-success rounded-full" />
+                        <span>{location.completedCount} completed</span>
+                      </div>
+                    )}
+                  </Popup>
+                </Marker>
+                
+                {/* Geofence circle around locations */}
+                {location.radius && (
+                  <Circle 
+                    center={position} 
+                    pathOptions={{ 
+                      fillColor: location.isNearby ? '#7c3aed' : '#3b82f6', 
+                      fillOpacity: 0.1, 
+                      color: location.isNearby ? '#7c3aed' : '#3b82f6',
+                      opacity: 0.5,
+                      weight: 1
+                    }}
+                    // @ts-ignore - radius prop issue with types
+                    radius={location.radius}
+                  />
                 )}
-                {location.hasActive && (
-                  <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full border border-white"></div>
-                )}
-                {location.hasCompleted && (
-                  <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 bg-success rounded-full border border-white"></div>
-                )}
-                {location.isNearby && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full border border-white animate-pulse">
-                    <BellRing className="h-2 w-2 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-          
-          {/* User location (center blue dot) */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
-            <div className="relative">
-              <div className="h-4 w-4 bg-primary rounded-full shadow-md border-2 border-white"></div>
-              <div className="absolute h-10 w-10 bg-primary/20 rounded-full -top-3 -left-3 animate-ping"></div>
-              <span className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 text-[10px] bg-primary/80 text-white py-0.5 px-1.5 rounded-full whitespace-nowrap">
-                You
-              </span>
-            </div>
-          </div>
-        </div>
+              </React.Fragment>
+            );
+          })}
+        </MapContainer>
       </div>
       
       {/* Map title overlay */}
@@ -184,6 +225,15 @@ const LocationBanner = () => {
               </Tooltip>
             </TooltipProvider>
           )}
+        </div>
+      </div>
+      
+      {/* Map controls overlay */}
+      <div className="absolute bottom-3 right-3 z-40">
+        <div className="bg-white rounded-md shadow-md p-1 flex flex-col gap-1">
+          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => window.open('https://www.openstreetmap.org', '_blank')}>
+            <MapPin className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>

@@ -1,0 +1,38 @@
+/* Styles for Leaflet map container */
+.mapContainer {
+  height: 100%;
+  width: 100%;
+}
+
+/* Custom marker styles */
+:global(.user-location-marker) {
+  background: transparent;
+  border: none;
+}
+
+:global(.location-marker) {
+  background: transparent;
+  border: none;
+}
+
+:global(.location-marker.animate-bounce) {
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Customize Leaflet controls */
+:global(.leaflet-control-attribution) {
+  display: none;
+}
+
+:global(.leaflet-control-zoom) {
+  display: none;
+} 
