@@ -1,12 +1,11 @@
-
 import React, { useState } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import TaskItem from './TaskItem';
+import TaskCalendar from './TaskCalendar';
 import { Task } from '../types';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, Star, Award, Sparkles } from 'lucide-react';
-import TaskMap from './TaskMap';
+import { MapPin, Star, Award, Sparkles, Calendar } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const TaskList: React.FC = () => {
@@ -52,10 +51,8 @@ const TaskList: React.FC = () => {
         </p>
       </div>
       
-      <TaskMap />
-      
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid grid-cols-3 w-full mb-6">
+        <TabsList className="grid grid-cols-4 w-full mb-6">
           <TabsTrigger 
             value="all" 
             onClick={() => setFilter('all')}
@@ -79,14 +76,22 @@ const TaskList: React.FC = () => {
             <Award className="h-4 w-4" />
             Done
           </TabsTrigger>
+          <TabsTrigger 
+            value="calendar" 
+            onClick={() => setFilter('all')}
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2"
+          >
+            <Calendar className="h-4 w-4" />
+            Calendar
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-6 mt-2">
           {Object.entries(tasksByLocation).map(([location, locationTasks]) => (
             <div key={location} className="space-y-2">
-              <h3 className="text-md font-medium flex items-center gap-2 px-1">
-                <MapPin className="h-4 w-4 text-primary" />
-                {location}
+              <h3 className="text-2xl font-bold flex items-center gap-2 px-1 font-inter text-[#1A1A1A]">
+                <MapPin className="h-6 w-6 text-primary" />
+                Today's Tasks
               </h3>
               <div className="space-y-3">
                 {locationTasks.map((task) => (
@@ -123,6 +128,10 @@ const TaskList: React.FC = () => {
               No completed tasks
             </div>
           )}
+        </TabsContent>
+        
+        <TabsContent value="calendar" className="mt-2">
+          <TaskCalendar />
         </TabsContent>
       </Tabs>
     </div>

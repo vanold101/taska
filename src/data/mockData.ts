@@ -1,4 +1,3 @@
-
 import { Task, Team } from '@/types';
 
 export const mockTeam: Team = {
@@ -7,33 +6,42 @@ export const mockTeam: Team = {
   members: [
     {
       id: 'user-1',
-      name: 'Alex Johnson',
-      avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Alex',
+      name: 'Admin User',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Admin',
       role: 'admin',
-      contact: { type: 'email', value: 'alex@example.com' }
-    },
-    {
-      id: 'user-2',
-      name: 'Sam Wilson',
-      avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Sam',
-      role: 'manager',
-      contact: { type: 'phone', value: '+1234567890' }
-    },
-    {
-      id: 'user-3',
-      name: 'Taylor Lee',
-      avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Taylor',
-      role: 'member',
-      contact: { type: 'email', value: 'taylor@example.com' }
-    },
-    {
-      id: 'user-4',
-      name: 'Jordan Smith',
-      avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Jordan',
-      role: 'member',
-      contact: { type: 'email', value: 'jordan@example.com' }
+      contact: { type: 'email', value: 'admin@company.com' }
     }
   ]
+};
+
+// Columbus, OH coordinates: 39.9612° N, 82.9988° W
+const columbusCoords = {
+  latitude: 39.9612,
+  longitude: -82.9988
+};
+
+// Mock locations with coordinates around Columbus
+const locations = {
+  'Kroger - Dublin': {
+    name: 'Kroger - Dublin',
+    coordinates: { latitude: 40.0992, longitude: -83.1141 },
+    radius: 300
+  },
+  'Target - Easton': {
+    name: 'Target - Easton',
+    coordinates: { latitude: 40.0503, longitude: -82.9151 },
+    radius: 300
+  },
+  'Whole Foods - Upper Arlington': {
+    name: 'Whole Foods - Upper Arlington',
+    coordinates: { latitude: 40.0359, longitude: -83.0621 },
+    radius: 300
+  },
+  "Office - Downtown": {
+    name: "Office - Downtown",
+    coordinates: { latitude: 39.9615, longitude: -82.9990 },  // Very close to mock user position
+    radius: 300
+  }
 };
 
 // Mock tasks data
@@ -42,52 +50,32 @@ export const mockTasks: Task[] = [
     id: 'task-1',
     title: 'Buy groceries for the week',
     description: 'Get fruits, vegetables, milk, and bread',
-    location: { name: 'Kroger - Dublin' },
+    location: locations['Kroger - Dublin'],
     completed: false,
     createdAt: new Date('2025-04-20T10:00:00'),
-    assignedTo: [mockTeam.members[0], mockTeam.members[1]],
-    createdBy: mockTeam.members[0].id
+    assignedTo: [mockTeam.members[0]],
+    createdBy: mockTeam.members[0].id,
+    recurrence: { type: 'weekly', interval: 1, daysOfWeek: [1] } // Repeats every Monday
   },
   {
     id: 'task-2',
     title: 'Pick up new office supplies',
     description: 'Notebooks, pens, and printer paper',
-    location: { name: 'Target - Easton' },
+    location: locations['Target - Easton'],
     completed: true,
     createdAt: new Date('2025-04-21T14:30:00'),
-    assignedTo: [mockTeam.members[1]],
+    assignedTo: [mockTeam.members[0]],
     createdBy: mockTeam.members[0].id
   },
   {
     id: 'task-3',
     title: 'Get organic coffee beans',
     description: 'For the office coffee machine',
-    location: { name: 'Whole Foods - Upper Arlington' },
+    location: locations['Whole Foods - Upper Arlington'],
     completed: false,
     createdAt: new Date('2025-04-22T09:15:00'),
-    assignedTo: [mockTeam.members[2]],
-    createdBy: mockTeam.members[1].id
-  },
-  {
-    id: 'task-4',
-    title: 'Pick up quarterly report printouts',
-    description: 'From the print shop near the office',
-    location: { name: 'Walmart Supercenter' },
-    completed: false,
-    createdAt: new Date('2025-04-23T16:45:00'),
-    dueDate: new Date('2025-04-25T17:00:00'),
-    assignedTo: [mockTeam.members[0], mockTeam.members[3]],
-    createdBy: mockTeam.members[0].id
-  },
-  {
-    id: 'task-5',
-    title: 'Get snacks for team meeting',
-    description: 'Chips, cookies, and drinks',
-    location: { name: "Trader Joe's" },
-    completed: false,
-    createdAt: new Date('2025-04-24T11:30:00'),
-    dueDate: new Date('2025-04-26T09:00:00'),
-    assignedTo: [mockTeam.members[2]],
-    createdBy: mockTeam.members[1].id
+    assignedTo: [mockTeam.members[0]],
+    createdBy: mockTeam.members[0].id,
+    recurrence: { type: 'monthly', interval: 1, dayOfMonth: 15 } // Repeats on the 15th of each month
   }
 ];
