@@ -1,4 +1,3 @@
-
 export interface Location {
   name: string;
   coordinates?: {
@@ -6,13 +5,6 @@ export interface Location {
     longitude: number;
   };
   radius?: number; // in meters
-}
-
-export interface TeamMember {
-  id: string;
-  name: string;
-  avatar?: string;
-  role: 'admin' | 'manager' | 'member';
 }
 
 export interface Task {
@@ -25,6 +17,17 @@ export interface Task {
   dueDate?: Date;
   assignedTo: TeamMember[];
   createdBy: string; // TeamMember id
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  avatar?: string;
+  role: 'admin' | 'manager' | 'member';
+  contact: {
+    type: 'email' | 'phone';
+    value: string;
+  };
 }
 
 export interface Team {

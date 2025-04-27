@@ -1,7 +1,6 @@
 
 import { Task, Team } from '@/types';
 
-// Mock team data
 export const mockTeam: Team = {
   id: 'team-1',
   name: 'Product Team',
@@ -10,25 +9,29 @@ export const mockTeam: Team = {
       id: 'user-1',
       name: 'Alex Johnson',
       avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Alex',
-      role: 'admin'
+      role: 'admin',
+      contact: { type: 'email', value: 'alex@example.com' }
     },
     {
       id: 'user-2',
       name: 'Sam Wilson',
       avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Sam',
-      role: 'manager'
+      role: 'manager',
+      contact: { type: 'phone', value: '+1234567890' }
     },
     {
       id: 'user-3',
       name: 'Taylor Lee',
       avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Taylor',
-      role: 'member'
+      role: 'member',
+      contact: { type: 'email', value: 'taylor@example.com' }
     },
     {
       id: 'user-4',
       name: 'Jordan Smith',
       avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Jordan',
-      role: 'member'
+      role: 'member',
+      contact: { type: 'email', value: 'jordan@example.com' }
     }
   ]
 };
