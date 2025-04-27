@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { MapPin, Navigation } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
@@ -33,17 +34,23 @@ const TaskMap = () => {
   const activeTasks = tasks.filter(task => !task.completed);
 
   useEffect(() => {
-    if (!mapContainer.current) return;
+    // Simulate loading for a more polished UX
+    const loadingTimer = setTimeout(() => {
+      // Calculate closest location to user before initializing map
+      const closest = findClosestLocation();
+      setClosestLocation(closest);
+      setIsLoadingMap(false);
+    }, 1500);
 
-    // Calculate closest location to user before initializing map
-    const closest = findClosestLocation();
-    setClosestLocation(closest);
+    return () => clearTimeout(loadingTimer);
+  }, []);
+
+  useEffect(() => {
+    if (isLoadingMap || !mapContainer.current) return;
 
     // Normally we would use an environment variable for the token
     // For demo purposes, using a temporary public token
     mapboxgl.accessToken = 'pk.eyJ1IjoibG92YWJsZWFpIiwiYSI6ImNsczRtbnptazBnb3gyanA2ajM1cXYwdWsifQ.a9QFV0UvdplfDOJgaRF8-Q';
-    
-    setIsLoadingMap(true);
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -55,7 +62,6 @@ const TaskMap = () => {
     map.current.on('load', () => {
       if (!map.current) return;
       setMapLoaded(true);
-      setIsLoadingMap(false);
 
       // Add store markers
       STORE_LOCATIONS.forEach(store => {
@@ -64,17 +70,23 @@ const TaskMap = () => {
         // Highlight the closest location
         if (store.name === closestLocation) {
           el.className = 'store-marker closest-marker';
+          el.innerHTML = `
+            <div class="marker-pin closest">
+              <div class="marker-content">
+                <span class="marker-count">${store.tasks}</span>
+              </div>
+            </div>
+          `;
         } else {
           el.className = 'store-marker';
-        }
-        
-        el.innerHTML = `
-          <div class="marker-pin ${store.name === closestLocation ? 'closest' : ''}">
-            <div class="marker-content">
-              <span class="marker-count">${store.tasks}</span>
+          el.innerHTML = `
+            <div class="marker-pin">
+              <div class="marker-content">
+                <span class="marker-count">${store.tasks}</span>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        }
         
         // Create popup with more details
         const popup = new mapboxgl.Popup({ offset: 25 })
@@ -99,49 +111,6 @@ const TaskMap = () => {
         .setLngLat(USER_LOCATION)
         .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML('<strong>You are here</strong>'))
         .addTo(map.current as mapboxgl.Map);
-      
-      // Add a pulsing dot animation to user location
-      const size = 100;
-      const pulsingDot = {
-        width: size,
-        height: size,
-        data: new Uint8Array(size * size * 4),
-        onAdd: function() {
-          const canvas = document.createElement('canvas');
-          canvas.width = this.width;
-          canvas.height = this.height;
-          this.context = canvas.getContext('2d');
-        },
-        render: function() {
-          const duration = 1000;
-          const t = (performance.now() % duration) / duration;
-          const radius = (size / 2) * 0.3;
-          const outerRadius = (size / 2) * 0.7 * t + radius;
-          const context = this.context;
-
-          // Draw the outer circle
-          context.clearRect(0, 0, this.width, this.height);
-          context.beginPath();
-          context.arc(
-            this.width / 2,
-            this.height / 2,
-            outerRadius,
-            0,
-            Math.PI * 2
-          );
-          context.fillStyle = `rgba(239, 68, 68, ${1 - t})`;
-          context.fill();
-
-          // Update this image's data with data from the canvas
-          this.data = context.getImageData(0, 0, this.width, this.height).data;
-
-          // Keep the map repainting
-          map.current?.triggerRepaint();
-
-          // Return `true` to let the map know that the image was updated
-          return true;
-        }
-      };
     });
 
     // Add navigation controls
@@ -153,7 +122,7 @@ const TaskMap = () => {
     return () => {
       map.current?.remove();
     };
-  }, [closestLocation]);
+  }, [isLoadingMap, closestLocation]);
 
   // Function to find the closest location to the user
   const findClosestLocation = (): string => {
@@ -201,9 +170,9 @@ const TaskMap = () => {
           <div className="space-y-3">
             <p className="text-muted-foreground font-medium">Fetching nearby tasks...</p>
             <div className="flex justify-center gap-1.5">
-              <Skeleton className="h-2 w-16 rounded-full bg-primary/20" />
-              <Skeleton className="h-2 w-10 rounded-full bg-primary/15" />
-              <Skeleton className="h-2 w-12 rounded-full bg-primary/10" />
+              <Skeleton className="h-2 w-16 rounded-full bg-primary/20 animate-pulse" />
+              <Skeleton className="h-2 w-10 rounded-full bg-primary/15 animate-pulse" />
+              <Skeleton className="h-2 w-12 rounded-full bg-primary/10 animate-pulse" />
             </div>
           </div>
         </div>

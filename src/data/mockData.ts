@@ -1,96 +1,90 @@
 
-import { Task, TeamMember, Team } from '../types';
+import { Task, Team } from '@/types';
 
-export const mockTeamMembers: TeamMember[] = [
-  {
-    id: '1',
-    name: 'You',
-    avatar: 'https://ui-avatars.com/api/?name=You&background=3B82F6&color=fff',
-  },
-  {
-    id: '2',
-    name: 'Alex Kim',
-    avatar: 'https://ui-avatars.com/api/?name=Alex+Kim&background=10B981&color=fff',
-  },
-  {
-    id: '3',
-    name: 'Jamie Smith',
-    avatar: 'https://ui-avatars.com/api/?name=Jamie+Smith&background=F59E0B&color=fff',
-  },
-];
-
+// Mock team data
 export const mockTeam: Team = {
-  id: '1',
-  name: 'Household',
-  members: mockTeamMembers,
+  id: 'team-1',
+  name: 'Product Team',
+  members: [
+    {
+      id: 'user-1',
+      name: 'Alex Johnson',
+      avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Alex',
+      role: 'admin'
+    },
+    {
+      id: 'user-2',
+      name: 'Sam Wilson',
+      avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Sam',
+      role: 'manager'
+    },
+    {
+      id: 'user-3',
+      name: 'Taylor Lee',
+      avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Taylor',
+      role: 'member'
+    },
+    {
+      id: 'user-4',
+      name: 'Jordan Smith',
+      avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Jordan',
+      role: 'member'
+    }
+  ]
 };
 
+// Mock tasks data
 export const mockTasks: Task[] = [
   {
-    id: '1',
-    title: 'Pick up milk and eggs',
-    description: '2% milk and a dozen eggs',
-    location: {
-      name: 'Kroger',
-      coordinates: {
-        latitude: 33.7490,
-        longitude: -84.3880,
-      },
-      radius: 100,
-    },
+    id: 'task-1',
+    title: 'Buy groceries for the week',
+    description: 'Get fruits, vegetables, milk, and bread',
+    location: { name: 'Kroger - Dublin' },
     completed: false,
-    createdAt: new Date('2025-04-25T10:00:00'),
-    assignedTo: [mockTeamMembers[0], mockTeamMembers[1]],
-    createdBy: '1',
+    createdAt: new Date('2025-04-20T10:00:00'),
+    assignedTo: [mockTeam.members[0], mockTeam.members[1]],
+    createdBy: mockTeam.members[0].id
   },
   {
-    id: '2',
-    title: 'Return library books',
-    location: {
-      name: 'Public Library',
-      coordinates: {
-        latitude: 33.7590,
-        longitude: -84.3920,
-      },
-      radius: 200,
-    },
-    completed: false,
-    createdAt: new Date('2025-04-24T15:30:00'),
-    dueDate: new Date('2025-04-30'),
-    assignedTo: [mockTeamMembers[0]],
-    createdBy: '1',
-  },
-  {
-    id: '3',
-    title: 'Pick up dry cleaning',
-    location: {
-      name: 'Cleaners on Main',
-      coordinates: {
-        latitude: 33.7520,
-        longitude: -84.3850,
-      },
-      radius: 50,
-    },
+    id: 'task-2',
+    title: 'Pick up new office supplies',
+    description: 'Notebooks, pens, and printer paper',
+    location: { name: 'Target - Easton' },
     completed: true,
-    createdAt: new Date('2025-04-23T09:15:00'),
-    assignedTo: [mockTeamMembers[2]],
-    createdBy: '3',
+    createdAt: new Date('2025-04-21T14:30:00'),
+    assignedTo: [mockTeam.members[1]],
+    createdBy: mockTeam.members[0].id
   },
   {
-    id: '4',
-    title: 'Buy dog food',
-    description: 'Premium kibble, large bag',
-    location: {
-      name: 'Pet Supplies Plus',
-      coordinates: {
-        latitude: 33.7530,
-        longitude: -84.3890,
-      },
-      radius: 100,
-    },
+    id: 'task-3',
+    title: 'Get organic coffee beans',
+    description: 'For the office coffee machine',
+    location: { name: 'Whole Foods - Upper Arlington' },
     completed: false,
-    createdAt: new Date('2025-04-25T11:45:00'),
-    assignedTo: [mockTeamMembers[0], mockTeamMembers[2]],
-    createdBy: '1',
+    createdAt: new Date('2025-04-22T09:15:00'),
+    assignedTo: [mockTeam.members[2]],
+    createdBy: mockTeam.members[1].id
   },
+  {
+    id: 'task-4',
+    title: 'Pick up quarterly report printouts',
+    description: 'From the print shop near the office',
+    location: { name: 'Walmart Supercenter' },
+    completed: false,
+    createdAt: new Date('2025-04-23T16:45:00'),
+    dueDate: new Date('2025-04-25T17:00:00'),
+    assignedTo: [mockTeam.members[0], mockTeam.members[3]],
+    createdBy: mockTeam.members[0].id
+  },
+  {
+    id: 'task-5',
+    title: 'Get snacks for team meeting',
+    description: 'Chips, cookies, and drinks',
+    location: { name: "Trader Joe's" },
+    completed: false,
+    createdAt: new Date('2025-04-24T11:30:00'),
+    dueDate: new Date('2025-04-26T09:00:00'),
+    assignedTo: [mockTeam.members[2]],
+    createdBy: mockTeam.members[1].id
+  }
 ];

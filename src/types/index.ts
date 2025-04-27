@@ -12,6 +12,7 @@ export interface TeamMember {
   id: string;
   name: string;
   avatar?: string;
+  role: 'admin' | 'manager' | 'member';
 }
 
 export interface Task {
