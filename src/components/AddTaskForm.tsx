@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { DatePicker } from './DatePicker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TeamMember } from '@/types';
-import { MapPin, UserPlus, Calendar, Users } from 'lucide-react';
+import { MapPin, UserPlus, Calendar, Users, Check } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 

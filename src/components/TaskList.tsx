@@ -5,6 +5,7 @@ import TaskItem from './TaskItem';
 import { Task } from '../types';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MapPin } from 'lucide-react';
 
 const TaskList: React.FC = () => {
   const { tasks } = useTaskContext();
