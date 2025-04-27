@@ -5,7 +5,8 @@ import TaskItem from './TaskItem';
 import { Task } from '../types';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin } from 'lucide-react';
+import { MapPin, Star, Award } from 'lucide-react';
+import TaskMap from './TaskMap';
 
 const TaskList: React.FC = () => {
   const { tasks } = useTaskContext();
@@ -29,13 +30,16 @@ const TaskList: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <TaskMap />
+      
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid grid-cols-3 w-full mb-4">
           <TabsTrigger 
             value="all" 
             onClick={() => setFilter('all')}
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2"
           >
+            <Star className="h-4 w-4" />
             All Tasks
           </TabsTrigger>
           <TabsTrigger 
@@ -48,9 +52,10 @@ const TaskList: React.FC = () => {
           <TabsTrigger 
             value="completed" 
             onClick={() => setFilter('completed')}
-            className="data-[state=active]:bg-success data-[state=active]:text-success-foreground"
+            className="data-[state=active]:bg-success data-[state=active]:text-success-foreground flex items-center gap-2"
           >
-            Completed
+            <Award className="h-4 w-4" />
+            Done
           </TabsTrigger>
         </TabsList>
 
