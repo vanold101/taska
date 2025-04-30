@@ -23,18 +23,13 @@ export interface TaskContextType {
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize with an empty array if mockTeam.members is not available or not an array
-  const [team, setTeam] = useState<TeamMember[]>(
-    Array.isArray(mockTeam.members) ? mockTeam.members : []
-  );
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [team, setTeam] = useState<TeamMember[]>(mockTeam.members);
   const [nearbyTasks, setNearbyTasks] = useState<Task[]>([]);
   const geofencingRef = useRef<(() => void) | null>(null);
   
   // For simplicity, we'll set the first team member as the current user (usually would be from auth)
-  const [currentUser, setCurrentUser] = useState<TeamMember | null>(
-    Array.isArray(team) && team.length > 0 ? team[0] : null
-  );
+  const [currentUser, setCurrentUser] = useState<TeamMember | null>(mockTeam.members[0]);
 
   // Load tasks from localStorage on component mount
   useEffect(() => {
@@ -57,15 +52,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (savedTeam) {
       try {
         const parsedTeam = JSON.parse(savedTeam);
-        if (Array.isArray(parsedTeam)) {
-          setTeam(parsedTeam);
-          // Set the first admin as current user or fall back to the first member
-          const admin = parsedTeam.find((m: TeamMember) => m.role === 'admin');
-          setCurrentUser(admin || parsedTeam[0] || null);
-        } else {
-          console.error('Saved team is not an array:', parsedTeam);
-          setTeam([]);
-        }
+        setTeam(parsedTeam);
+        // Set the first admin as current user or fall back to the first member
+        const admin = parsedTeam.find((m: TeamMember) => m.role === 'admin');
+        setCurrentUser(admin || parsedTeam[0]);
       } catch (e) {
         console.error('Error parsing team from localStorage:', e);
       }
@@ -407,9 +397,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: uuidv4()
     };
     
-    // Ensure we're working with an array
-    const updatedTeam = Array.isArray(team) ? [...team, newMember] : [newMember];
-    setTeam(updatedTeam);
+    setTeam([...team, newMember]);
   };
   
   const removeTeamMember = (memberId: string) => {
@@ -424,10 +412,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     
-    // Ensure we're working with an array
-    if (Array.isArray(team)) {
-      setTeam(team.filter(m => m.id !== memberId));
-    }
+    setTeam(team.filter(m => m.id !== memberId));
   };
 
   const updateTeam = useCallback((updatedTeam: TeamMember[]) => {
@@ -435,14 +420,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.error('Only admins can update the team');
       return;
     }
-    
-    // Ensure we're setting an array
-    if (Array.isArray(updatedTeam)) {
-      setTeam(updatedTeam);
-      localStorage.setItem('team', JSON.stringify(updatedTeam));
-    } else {
-      console.error('Updated team is not an array:', updatedTeam);
-    }
+    setTeam(updatedTeam);
+    localStorage.setItem('team', JSON.stringify(updatedTeam));
   }, [currentUser]);
 
   return (
