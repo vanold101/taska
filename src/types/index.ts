@@ -1,3 +1,4 @@
+
 export interface Task {
   id: string;
   title: string;
@@ -20,6 +21,7 @@ export interface TeamMember {
   email: string;
   avatar: string;
   role: 'admin' | 'manager' | 'member';
+  contact?: { type: string; value: string }; // Add this to support contact info
 }
 
 export interface Team {
@@ -34,6 +36,7 @@ export interface Location {
     latitude: number;
     longitude: number;
   };
+  radius?: number; // Add this to support location radius
 }
 
 export interface RecurrencePattern {

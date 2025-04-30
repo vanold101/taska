@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
+import { toast } from "sonner";
 
 const AddTaskForm: React.FC = () => {
   const { addTask, team, currentUser, currentTeam } = useTaskContext();
@@ -82,7 +82,7 @@ const AddTaskForm: React.FC = () => {
           recurrence = { type: 'yearly', interval, month: recurringMonth, day: recurringDay };
           break;
         default:
-          recurrence = { type: 'none' };
+          recurrence = { type: 'none', interval: 0 };
       }
     }
     
