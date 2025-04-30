@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlusCircle, Users, Settings, LogOut, Menu, X } from 'lucide-react';
 import { Team, TeamMember } from '@/types';
-import { useMediaQuery } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 
 export const TeamSidebar = () => {
@@ -16,7 +15,7 @@ export const TeamSidebar = () => {
   const [newTeamName, setNewTeamName] = useState('');
   const [createTeamOpen, setCreateTeamOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   
   const handleAddTeam = () => {
     if (!newTeamName.trim()) {
