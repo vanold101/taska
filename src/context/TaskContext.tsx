@@ -19,7 +19,7 @@ export interface TaskContextType {
   toggleTaskCompletion: (id: string) => void;
   addTeamMember: (member: Omit<TeamMember, 'id'>) => void;
   removeTeamMember: (id: string) => void;
-  updateTeam: (updatedTeam: TeamMember[]) => void;
+  updateTeam: (updatedMembers: TeamMember[]) => void;
   setCurrentTeam: (team: Team) => void;
   addTeam: (team: Omit<Team, 'id'>) => void;
 }
@@ -312,9 +312,15 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Update the addTask function to associate tasks with the current team
   const addTask = (taskData: Omit<Task, 'id'>) => {
     if (!hasPermission('add')) {
       toast.error('You do not have permission to add tasks');
+      return;
+    }
+    
+    if (!currentTeam) {
+      toast.error('No team selected');
       return;
     }
     
@@ -322,6 +328,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...taskData,
       id: Date.now().toString(),
       createdAt: new Date(),
+      teamId: currentTeam.id, // Associate task with current team
     };
     
     setTasks([...tasks, newTask]);
@@ -414,6 +421,13 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.success('Task updated');
   };
 
+  // Filter tasks to show only those belonging to the current team
+  const getTeamTasks = useCallback(() => {
+    if (!currentTeam) return [];
+    return tasks.filter(task => task.teamId === currentTeam.id);
+  }, [tasks, currentTeam]);
+
+  // Get nearby tasks for the current team
   const getNearbyTasks = async (currentLocation: Location): Promise<Task[]> => {
     // If location has coordinates, use real distance calculation
     if (currentLocation.coordinates) {
@@ -565,7 +579,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <TaskContext.Provider
       value={{
-        tasks,
+        tasks: getTeamTasks(), // Only return tasks for current team
         team,
         teams,
         currentUser,

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import { Button } from '@/components/ui/button';
@@ -17,9 +16,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 
 const AddTaskForm: React.FC = () => {
-  const { addTask, team, currentUser } = useTaskContext();
+  const { addTask, team, currentUser, currentTeam } = useTaskContext();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -59,7 +59,10 @@ const AddTaskForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title || !locationName || !currentUser) return;
+    if (!title || !locationName || !currentUser || !currentTeam) {
+      toast.error(currentTeam ? 'Please fill in required fields' : 'No team selected');
+      return;
+    }
     
     // Create the recurrence pattern if enabled
     let recurrence: RecurrencePattern | undefined;
@@ -108,7 +111,8 @@ const AddTaskForm: React.FC = () => {
       createdAt: new Date(),
       dueDate,
       recurrence,
-      rotation
+      rotation,
+      teamId: currentTeam.id // Add team ID to associate task with current team
     });
     
     // Reset form
@@ -183,18 +187,30 @@ const AddTaskForm: React.FC = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <motion.div 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full"
+      {currentTeam ? (
+        <DialogTrigger asChild>
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full"
+          >
+            <Button className="w-full bg-gradient-to-r from-[#4F46E5] to-[#7E69AB] hover:from-[#4F46E5]/90 hover:to-[#7E69AB]/90 font-inter font-semibold text-base shadow-md flex items-center justify-center gap-2 py-6">
+              <PlusCircle className="h-5 w-5" />
+              Add New Task to {currentTeam.name}
+            </Button>
+          </motion.div>
+        </DialogTrigger>
+      ) : (
+        <Button 
+          className="w-full bg-muted text-muted-foreground cursor-not-allowed"
+          onClick={() => toast.error('Please select a team first')}
+          disabled
         >
-          <Button className="w-full bg-gradient-to-r from-[#4F46E5] to-[#7E69AB] hover:from-[#4F46E5]/90 hover:to-[#7E69AB]/90 font-inter font-semibold text-base shadow-md flex items-center justify-center gap-2 py-6">
-            <PlusCircle className="h-5 w-5" />
-            Add New Task
-          </Button>
-        </motion.div>
-      </DialogTrigger>
+          <PlusCircle className="h-5 w-5 mr-2" />
+          Select a Team First
+        </Button>
+      )}
+      
       <DialogContent 
         className="sm:max-w-md max-h-[90vh] flex flex-col"
         style={{ overflowY: 'hidden' }}
