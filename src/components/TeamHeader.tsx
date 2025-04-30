@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTaskContext } from '@/context/TaskContext';
@@ -36,11 +37,14 @@ const TeamHeader = () => {
   const [contactType, setContactType] = useState<'email' | 'phone'>('email');
   const [contactValue, setContactValue] = useState('');
 
-  // Create a Team object from the team array for display purposes
+  // Ensure team is always an array before using array methods
+  const teamMembers = Array.isArray(team) ? team : [];
+
+  // Create a Team object from the teamMembers array for display purposes
   const teamObj: Team = {
     id: 'team-1',
     name: 'Product Team',
-    members: team || []
+    members: teamMembers
   };
 
   const validateContact = (type: 'email' | 'phone', value: string) => {

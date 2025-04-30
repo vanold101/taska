@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTaskContext } from '@/context/TaskContext';
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -10,12 +11,15 @@ import { Team } from '@/types';
 export function TeamSidebar() {
   const { team } = useTaskContext();
   
+  // Ensure team is always an array before using it
+  const teamMembers = Array.isArray(team) ? team : [];
+  
   // Mock teams for the demo - in a real app, this would come from a context or API
   const teams: Team[] = [
     {
       id: 'team-1',
       name: 'Product Team',
-      members: team
+      members: teamMembers
     },
     {
       id: 'team-2',
