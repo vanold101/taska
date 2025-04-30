@@ -1,20 +1,22 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from './DatePicker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RecurrencePattern, RotationPattern, TeamMember } from '@/types';
-import { MapPin, Calendar, Users, Check, RotateCcw, ChevronDown, ChevronUp, RefreshCw, MoveUp, MoveDown } from 'lucide-react';
+import { MapPin, Calendar, Users, Check, RotateCcw, ChevronDown, ChevronUp, RefreshCw, MoveUp, MoveDown, PlusCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 const AddTaskForm: React.FC = () => {
   const { addTask, team, currentUser } = useTaskContext();
@@ -182,9 +184,16 @@ const AddTaskForm: React.FC = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full bg-[#4F46E5] hover:bg-[#4F46E5]/90 font-inter font-semibold text-base">
-          Add New Task
-        </Button>
+        <motion.div 
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full"
+        >
+          <Button className="w-full bg-gradient-to-r from-[#4F46E5] to-[#7E69AB] hover:from-[#4F46E5]/90 hover:to-[#7E69AB]/90 font-inter font-semibold text-base shadow-md flex items-center justify-center gap-2 py-6">
+            <PlusCircle className="h-5 w-5" />
+            Add New Task
+          </Button>
+        </motion.div>
       </DialogTrigger>
       <DialogContent 
         className="sm:max-w-md max-h-[90vh] flex flex-col"
@@ -192,6 +201,9 @@ const AddTaskForm: React.FC = () => {
       >
         <DialogHeader className="sticky top-0 bg-background z-10 pb-2">
           <DialogTitle>Add New Task</DialogTitle>
+          <DialogDescription>
+            Create a new task for your team
+          </DialogDescription>
         </DialogHeader>
         
         <div 
@@ -560,6 +572,7 @@ const AddTaskForm: React.FC = () => {
             type="submit"
             onClick={handleSubmit}
             disabled={(isRecurring && !dueDate) || (isRotationEnabled && rotationMembers.length === 0)}
+            className="bg-gradient-to-r from-[#4F46E5] to-[#7E69AB] hover:from-[#4F46E5]/90 hover:to-[#7E69AB]/90"
           >
             Add Task
           </Button>
