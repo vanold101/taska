@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { TaskProvider, useTaskContext } from '@/context/TaskContext';
+import { useTaskContext } from '@/context/TaskContext';
 import { Card, CardContent } from '@/components/ui/card';
 import AddTaskForm from '@/components/AddTaskForm';
 import TaskList from '@/components/TaskList';
@@ -32,45 +33,45 @@ const AdminSection = () => {
 };
 
 const Index = () => {
+  const { currentTeam } = useTaskContext();
+  
   return (
-    <TaskProvider>
-      <div className="min-h-screen">
-        <div className="container max-w-md mx-auto py-10 px-4">
-          <header className="mb-10">
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <h1 className="text-[32px] font-inter font-semibold text-center text-[#121212]">Taska</h1>
-            </div>
-            <p className="text-muted-foreground text-center text-sm flex items-center justify-center gap-1">
-              Where Every Task Has a Place
-            </p>
-          </header>
-          
-          <TeamHeader />
-          
-          <AdminSection />
-          
-          <div className="my-8">
-            <AddTaskForm />
+    <div className="min-h-screen">
+      <div className="container max-w-md mx-auto py-10 px-4">
+        <header className="mb-10">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <h1 className="text-[32px] font-inter font-semibold text-center text-[#121212]">Taska</h1>
           </div>
-          
-          <LocationBanner />
-          
-          <Card className="overflow-hidden border-0 shadow-lg rounded-xl premium-card">
-            <CardContent className="p-6">
-              <TaskList />
-            </CardContent>
-          </Card>
-          
-          <footer className="mt-10 text-center text-xs text-muted-foreground">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Map className="h-3 w-3" />
-              <span>Columbus, Ohio</span>
-            </div>
-            <p>© 2025 Taska - Famka Products, LLC</p>
-          </footer>
+          <p className="text-muted-foreground text-center text-sm flex items-center justify-center gap-1">
+            Where Every Task Has a Place
+          </p>
+        </header>
+        
+        {currentTeam && <TeamHeader />}
+        
+        <AdminSection />
+        
+        <div className="my-8">
+          <AddTaskForm />
         </div>
+        
+        <LocationBanner />
+        
+        <Card className="overflow-hidden border-0 shadow-lg rounded-xl premium-card">
+          <CardContent className="p-6">
+            <TaskList />
+          </CardContent>
+        </Card>
+        
+        <footer className="mt-10 text-center text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-1 mb-1">
+            <Map className="h-3 w-3" />
+            <span>Columbus, Ohio</span>
+          </div>
+          <p>© 2025 Taska - Famka Products, LLC</p>
+        </footer>
       </div>
-    </TaskProvider>
+    </div>
   );
 };
 

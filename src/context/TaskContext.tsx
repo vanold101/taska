@@ -9,7 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 export interface TaskContextType {
   tasks: Task[];
   team: TeamMember[];
+  teams: Team[];
   currentUser: TeamMember | null;
+  currentTeam: Team | null;
   nearbyTasks: Task[];
   addTask: (task: Omit<Task, 'id'>) => void;
   updateTask: (id: string, task: Partial<Task>) => void;
@@ -18,21 +20,63 @@ export interface TaskContextType {
   addTeamMember: (member: Omit<TeamMember, 'id'>) => void;
   removeTeamMember: (id: string) => void;
   updateTeam: (updatedTeam: TeamMember[]) => void;
+  setCurrentTeam: (team: Team) => void;
+  addTeam: (team: Omit<Team, 'id'>) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [teams, setTeams] = useState<Team[]>([
+    {
+      id: 'team-1',
+      name: 'Product Team',
+      members: mockTeam.members
+    },
+    {
+      id: 'team-2',
+      name: 'Marketing Team',
+      members: []
+    },
+    {
+      id: 'team-3',
+      name: 'Design Team',
+      members: []
+    }
+  ]);
+  const [currentTeam, setCurrentTeam] = useState<Team | null>(null);
+  
+  // For simplicity, we'll set the first team member as the current user (usually would be from auth)
+  const [currentUser, setCurrentUser] = useState<TeamMember | null>(mockTeam.members[0]);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [team, setTeam] = useState<TeamMember[]>(mockTeam.members);
   const [nearbyTasks, setNearbyTasks] = useState<Task[]>([]);
   const geofencingRef = useRef<(() => void) | null>(null);
   
-  // For simplicity, we'll set the first team member as the current user (usually would be from auth)
-  const [currentUser, setCurrentUser] = useState<TeamMember | null>(mockTeam.members[0]);
-
-  // Load tasks from localStorage on component mount
+  // Set initial currentTeam
   useEffect(() => {
+    if (teams.length > 0 && !currentTeam) {
+      setCurrentTeam(teams[0]);
+    }
+  }, [teams, currentTeam]);
+
+  // Load teams from localStorage on component mount
+  useEffect(() => {
+    const savedTeams = localStorage.getItem('teams');
+    if (savedTeams) {
+      try {
+        const parsedTeams = JSON.parse(savedTeams);
+        setTeams(parsedTeams);
+        // Set the first team as current
+        if (parsedTeams.length > 0) {
+          setCurrentTeam(parsedTeams[0]);
+        }
+      } catch (e) {
+        console.error('Error parsing teams from localStorage:', e);
+      }
+    }
+    
+    // Also load tasks from localStorage if available
     const savedTasks = localStorage.getItem('tasks');
     if (savedTasks) {
       try {
@@ -247,10 +291,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
   
-  // Save team to localStorage whenever it changes
+  // Save teams to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('team', JSON.stringify(team));
-  }, [team]);
+    localStorage.setItem('teams', JSON.stringify(teams));
+  }, [teams]);
 
   // Check if user has permission to perform an action
   const hasPermission = (action: 'add' | 'delete' | 'update' | 'complete') => {
@@ -386,9 +430,66 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return tasks.filter((task) => !task.completed);
   };
   
+  // Handle team switching
+  const handleSetCurrentTeam = (team: Team) => {
+    setCurrentTeam(team);
+    // Update the current team members
+    if (team.members && team.members.length > 0) {
+      setTeam(team.members);
+    } else {
+      // If team has no members yet, add the current user
+      const updatedTeam = {
+        ...team,
+        members: currentUser ? [currentUser] : []
+      };
+      updateTeamInList(updatedTeam);
+    }
+    toast.success(`Switched to ${team.name}`);
+  };
+
+  // Add a new team
+  const addTeam = (teamData: Omit<Team, 'id'>) => {
+    if (!hasPermission('add')) {
+      toast.error('You do not have permission to create teams');
+      return;
+    }
+    
+    const newTeam: Team = {
+      ...teamData,
+      id: `team-${Date.now()}`,
+    };
+    
+    const updatedTeams = [...teams, newTeam];
+    setTeams(updatedTeams);
+    setCurrentTeam(newTeam);
+    toast.success(`Team "${newTeam.name}" created`);
+  };
+
+  // Update a team in the teams list
+  const updateTeamInList = (updatedTeam: Team) => {
+    const teamIndex = teams.findIndex(t => t.id === updatedTeam.id);
+    if (teamIndex !== -1) {
+      const newTeams = [...teams];
+      newTeams[teamIndex] = updatedTeam;
+      setTeams(newTeams);
+      
+      // If this is the current team, update it
+      if (currentTeam && currentTeam.id === updatedTeam.id) {
+        setCurrentTeam(updatedTeam);
+        setTeam(updatedTeam.members || []);
+      }
+    }
+  };
+
+  // Function to add team member to the current team
   const addTeamMember = (member: Omit<TeamMember, 'id'>) => {
     if (currentUser?.role !== 'admin') {
       toast.error('Only admins can add team members');
+      return;
+    }
+    
+    if (!currentTeam) {
+      toast.error('No team selected');
       return;
     }
     
@@ -397,7 +498,20 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: uuidv4()
     };
     
-    setTeam([...team, newMember]);
+    // Add to current team members
+    const updatedMembers = [...team, newMember];
+    setTeam(updatedMembers);
+    
+    // Also update the current team in the teams list
+    if (currentTeam) {
+      const updatedTeam = {
+        ...currentTeam,
+        members: updatedMembers
+      };
+      updateTeamInList(updatedTeam);
+    }
+    
+    toast.success(`Added ${newMember.name} to the team`);
   };
   
   const removeTeamMember = (memberId: string) => {
@@ -412,24 +526,50 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     
-    setTeam(team.filter(m => m.id !== memberId));
+    const updatedMembers = team.filter(m => m.id !== memberId);
+    setTeam(updatedMembers);
+    
+    // Also update the current team in the teams list
+    if (currentTeam) {
+      const updatedTeam = {
+        ...currentTeam,
+        members: updatedMembers
+      };
+      updateTeamInList(updatedTeam);
+    }
+    
+    toast.success('Team member removed');
   };
 
-  const updateTeam = useCallback((updatedTeam: TeamMember[]) => {
+  const updateTeam = useCallback((updatedMembers: TeamMember[]) => {
     if (currentUser?.role !== 'admin') {
       toast.error('Only admins can update the team');
       return;
     }
-    setTeam(updatedTeam);
-    localStorage.setItem('team', JSON.stringify(updatedTeam));
-  }, [currentUser]);
+    
+    setTeam(updatedMembers);
+    localStorage.setItem('team', JSON.stringify(updatedMembers));
+    
+    // Also update the current team in the teams list
+    if (currentTeam) {
+      const updatedTeam = {
+        ...currentTeam,
+        members: updatedMembers
+      };
+      updateTeamInList(updatedTeam);
+    }
+    
+    toast.success('Team updated');
+  }, [currentUser, currentTeam]);
 
   return (
     <TaskContext.Provider
       value={{
         tasks,
         team,
+        teams,
         currentUser,
+        currentTeam,
         nearbyTasks,
         addTask,
         updateTask,
@@ -438,6 +578,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addTeamMember,
         removeTeamMember,
         updateTeam,
+        setCurrentTeam: handleSetCurrentTeam,
+        addTeam,
       }}
     >
       {children}
