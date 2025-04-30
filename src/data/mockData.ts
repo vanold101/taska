@@ -1,4 +1,3 @@
-
 import { Task, Team } from '@/types';
 
 export const mockTeam: Team = {
@@ -10,7 +9,6 @@ export const mockTeam: Team = {
       name: 'Admin User',
       avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Admin',
       role: 'admin',
-      email: 'admin@company.com',
       contact: { type: 'email', value: 'admin@company.com' }
     }
   ]
@@ -57,7 +55,6 @@ export const mockTasks: Task[] = [
     createdAt: new Date('2025-04-20T10:00:00'),
     assignedTo: [mockTeam.members[0]],
     createdBy: mockTeam.members[0].id,
-    teamId: mockTeam.id, // Add team ID
     recurrence: { type: 'weekly', interval: 1, daysOfWeek: [1] } // Repeats every Monday
   },
   {
@@ -68,8 +65,7 @@ export const mockTasks: Task[] = [
     completed: true,
     createdAt: new Date('2025-04-21T14:30:00'),
     assignedTo: [mockTeam.members[0]],
-    createdBy: mockTeam.members[0].id,
-    teamId: mockTeam.id // Add team ID
+    createdBy: mockTeam.members[0].id
   },
   {
     id: 'task-3',
@@ -80,7 +76,6 @@ export const mockTasks: Task[] = [
     createdAt: new Date('2025-04-22T09:15:00'),
     assignedTo: [mockTeam.members[0]],
     createdBy: mockTeam.members[0].id,
-    teamId: mockTeam.id, // Add team ID
     recurrence: { type: 'monthly', interval: 1, dayOfMonth: 15 } // Repeats on the 15th of each month
   }
 ];

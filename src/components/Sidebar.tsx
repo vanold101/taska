@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTaskContext } from '@/context/TaskContext';
 import { cn } from '@/lib/utils';
@@ -38,7 +37,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onManageTeam }) => {
-  const { currentTeam, currentUser } = useTaskContext();
+  const { team, currentUser } = useTaskContext();
   const [activeSection, setActiveSection] = useState<'tasks' | 'team'>('tasks');
   const [expanded, setExpanded] = useState({
     tasks: true,
@@ -47,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onManageTeam }) => {
 
   // Mock teams for the demo - in a real app, this would come from a context or API
   const mockTeams: Team[] = [
-    currentTeam as Team, // Cast to Team to ensure type compatibility
+    team,
     {
       id: 'team-2',
       name: 'Marketing Team',
@@ -85,10 +84,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onManageTeam }) => {
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
                   <AvatarFallback className="bg-primary text-primary-foreground">
-                    {currentTeam?.name.charAt(0)}
+                    {team.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="font-medium truncate">{currentTeam?.name}</span>
+                <span className="font-medium truncate">{team.name}</span>
               </div>
               <ChevronDown className="h-4 w-4 opacity-60" />
             </Button>
@@ -103,16 +102,16 @@ const Sidebar: React.FC<SidebarProps> = ({ onManageTeam }) => {
                 onClick={() => switchTeam(t.id)}
                 className={cn(
                   "flex items-center gap-2 p-2", 
-                  t.id === currentTeam?.id && "bg-primary/10 text-primary"
+                  t.id === team.id && "bg-primary/10 text-primary"
                 )}
               >
                 <Avatar className="h-6 w-6">
-                  <AvatarFallback className={t.id === currentTeam?.id ? "bg-primary text-primary-foreground" : ""}>
+                  <AvatarFallback className={t.id === team.id ? "bg-primary text-primary-foreground" : ""}>
                     {t.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <span className="truncate">{t.name}</span>
-                {t.id === currentTeam?.id && (
+                {t.id === team.id && (
                   <CheckSquare className="h-4 w-4 ml-auto" />
                 )}
               </DropdownMenuItem>
@@ -174,7 +173,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onManageTeam }) => {
           
           {expanded.team && (
             <div className="mt-1 space-y-0.5 pl-4">
-              {currentTeam?.members.map(member => (
+              {team.map(member => (
                 <div 
                   key={member.id} 
                   className="flex items-center gap-2 p-1.5 rounded-md hover:bg-muted/80 cursor-pointer text-sm"
@@ -233,4 +232,4 @@ const Sidebar: React.FC<SidebarProps> = ({ onManageTeam }) => {
   );
 };
 
-export default Sidebar;
+export default Sidebar; 

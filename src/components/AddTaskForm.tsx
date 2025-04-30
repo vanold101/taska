@@ -3,23 +3,21 @@ import { useTaskContext } from '../context/TaskContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from './DatePicker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RecurrencePattern, RotationPattern, TeamMember } from '@/types';
-import { MapPin, Calendar, Users, Check, RotateCcw, ChevronDown, ChevronUp, RefreshCw, MoveUp, MoveDown, PlusCircle } from 'lucide-react';
+import { MapPin, Calendar, Users, Check, RotateCcw, ChevronDown, ChevronUp, RefreshCw, MoveUp, MoveDown } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
-import { toast } from "sonner";
 
 const AddTaskForm: React.FC = () => {
-  const { addTask, team, currentUser, currentTeam } = useTaskContext();
+  const { addTask, team, currentUser } = useTaskContext();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -59,10 +57,7 @@ const AddTaskForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title || !locationName || !currentUser || !currentTeam) {
-      toast.error(currentTeam ? 'Please fill in required fields' : 'No team selected');
-      return;
-    }
+    if (!title || !locationName || !currentUser) return;
     
     // Create the recurrence pattern if enabled
     let recurrence: RecurrencePattern | undefined;
@@ -82,7 +77,7 @@ const AddTaskForm: React.FC = () => {
           recurrence = { type: 'yearly', interval, month: recurringMonth, day: recurringDay };
           break;
         default:
-          recurrence = { type: 'none', interval: 0 };
+          recurrence = { type: 'none' };
       }
     }
     
@@ -111,8 +106,7 @@ const AddTaskForm: React.FC = () => {
       createdAt: new Date(),
       dueDate,
       recurrence,
-      rotation,
-      teamId: currentTeam.id // Add team ID to associate task with current team
+      rotation
     });
     
     // Reset form
@@ -187,39 +181,17 @@ const AddTaskForm: React.FC = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {currentTeam ? (
-        <DialogTrigger asChild>
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full"
-          >
-            <Button className="w-full bg-gradient-to-r from-[#4F46E5] to-[#7E69AB] hover:from-[#4F46E5]/90 hover:to-[#7E69AB]/90 font-inter font-semibold text-base shadow-md flex items-center justify-center gap-2 py-6">
-              <PlusCircle className="h-5 w-5" />
-              Add New Task to {currentTeam.name}
-            </Button>
-          </motion.div>
-        </DialogTrigger>
-      ) : (
-        <Button 
-          className="w-full bg-muted text-muted-foreground cursor-not-allowed"
-          onClick={() => toast.error('Please select a team first')}
-          disabled
-        >
-          <PlusCircle className="h-5 w-5 mr-2" />
-          Select a Team First
+      <DialogTrigger asChild>
+        <Button className="w-full bg-[#4F46E5] hover:bg-[#4F46E5]/90 font-inter font-semibold text-base">
+          Add New Task
         </Button>
-      )}
-      
+      </DialogTrigger>
       <DialogContent 
         className="sm:max-w-md max-h-[90vh] flex flex-col"
         style={{ overflowY: 'hidden' }}
       >
         <DialogHeader className="sticky top-0 bg-background z-10 pb-2">
           <DialogTitle>Add New Task</DialogTitle>
-          <DialogDescription>
-            Create a new task for your team
-          </DialogDescription>
         </DialogHeader>
         
         <div 
@@ -588,7 +560,6 @@ const AddTaskForm: React.FC = () => {
             type="submit"
             onClick={handleSubmit}
             disabled={(isRecurring && !dueDate) || (isRotationEnabled && rotationMembers.length === 0)}
-            className="bg-gradient-to-r from-[#4F46E5] to-[#7E69AB] hover:from-[#4F46E5]/90 hover:to-[#7E69AB]/90"
           >
             Add Task
           </Button>

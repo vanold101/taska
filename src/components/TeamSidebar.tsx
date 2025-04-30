@@ -1,149 +1,79 @@
-import React, { useState } from 'react';
-import { useTaskContext } from '../context/TaskContext';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlusCircle, Users, Settings, LogOut, Menu, X } from 'lucide-react';
-import { Team, TeamMember } from '@/types';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { toast } from 'sonner';
+import React from 'react';
+import { useTaskContext } from '@/context/TaskContext';
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
+import { ScrollArea } from "./ui/scroll-area";
+import { PlusCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Team } from '@/types';
 
-export const TeamSidebar = () => {
-  const { teams, addTeam, currentTeam, setCurrentTeam, currentUser } = useTaskContext();
-  const [newTeamName, setNewTeamName] = useState('');
-  const [createTeamOpen, setCreateTeamOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const isMobile = useIsMobile();
+export function TeamSidebar() {
+  const { team } = useTaskContext();
   
-  const handleAddTeam = () => {
-    if (!newTeamName.trim()) {
-      toast.error('Please enter a team name');
-      return;
+  // Mock teams for the demo - in a real app, this would come from a context or API
+  const teams: Team[] = [
+    {
+      id: 'team-1',
+      name: 'Product Team',
+      members: team
+    },
+    {
+      id: 'team-2',
+      name: 'Marketing Team',
+      members: []
+    },
+    {
+      id: 'team-3',
+      name: 'Design Team',
+      members: []
     }
-    
-    addTeam({
-      name: newTeamName,
-      members: currentUser ? [currentUser] : []
-    });
-    
-    setNewTeamName('');
-    setCreateTeamOpen(false);
+  ];
+  
+  // Current team is the first one
+  const currentTeam = teams[0];
+
+  // In a real implementation, this would update the context
+  const setCurrentTeam = (team: Team) => {
+    console.log(`Switching to team: ${team.id}`);
   };
-  
-  const handleSwitchTeam = (team: Team) => {
-    setCurrentTeam(team);
-    if (isMobile) {
-      setIsOpen(false);
-    }
-  };
-  
-  if (isMobile && !isOpen) {
-    return (
-      <Button 
-        className="fixed top-4 left-4 z-50 rounded-full w-10 h-10 p-0 bg-primary/90 shadow-lg"
-        onClick={() => setIsOpen(true)}
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
-    );
-  }
-  
-  const sidebarContent = (
-    <div className="h-full flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
-      <div className="p-4 border-b border-sidebar-border">
-        <h2 className="font-semibold text-lg">Teams</h2>
-      </div>
-      
-      <div className="flex-1 overflow-auto py-2">
-        <div className="space-y-1 px-3">
-          {teams.map((team) => (
-            <button
-              key={team.id}
-              onClick={() => handleSwitchTeam(team)}
-              className={`w-full flex items-center p-2 rounded-md transition-colors ${
-                currentTeam?.id === team.id
-                  ? 'bg-primary/10 text-primary'
-                  : 'hover:bg-sidebar-muted/10'
-              }`}
-            >
-              <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center mr-2 font-medium">
-                {team.name.charAt(0)}
-              </div>
-              <span className="truncate">{team.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      
-      <div className="p-3 border-t border-sidebar-border mt-auto">
-        <Dialog open={createTeamOpen} onOpenChange={setCreateTeamOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="w-full flex gap-2 items-center justify-start">
-              <PlusCircle className="h-4 w-4" />
-              <span>New Team</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create a new team</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="team-name">Team Name</Label>
-                <Input
-                  id="team-name"
-                  placeholder="Enter team name"
-                  value={newTeamName}
-                  onChange={(e) => setNewTeamName(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleAddTeam} className="w-full">
-                Create Team
+
+  return (
+    <div className="h-full w-56 flex flex-col bg-muted/40 border-r">
+      <div className="p-2">
+        <h2 className="text-lg font-semibold mb-2 px-2 font-inter">Teams</h2>
+        <ScrollArea className="h-[calc(100vh-120px)]">
+          <div className="space-y-1 p-2">
+            {teams?.map((team) => (
+              <Button
+                key={team.id}
+                variant={team.id === currentTeam?.id ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start font-normal font-inter",
+                  team.id === currentTeam?.id && "font-medium"
+                )}
+                onClick={() => setCurrentTeam(team)}
+              >
+                <Avatar className="h-5 w-5 mr-2">
+                  <AvatarImage 
+                    src={`https://avatar.vercel.sh/${team.name}.png`} 
+                    alt={team.name} 
+                  />
+                  <AvatarFallback>
+                    {team.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {team.name}
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-        
-        {currentUser && (
-          <div className="flex items-center mt-3 p-2">
-            <Avatar className="h-8 w-8 mr-2">
-              <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-              <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{currentUser.name}</p>
-              <p className="text-xs text-sidebar-muted truncate capitalize">{currentUser.role}</p>
-            </div>
+            ))}
           </div>
-        )}
+        </ScrollArea>
       </div>
-      
-      {isMobile && (
-        <div className="absolute top-4 right-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="rounded-full" 
-            onClick={() => setIsOpen(false)}
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-  
-  return isMobile ? (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-      <div className="fixed inset-y-0 left-0 w-64 z-50">
-        {sidebarContent}
+      <div className="mt-auto p-4 border-t">
+        <Button variant="outline" size="sm" className="w-full font-inter font-semibold">
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Add Team
+        </Button>
       </div>
     </div>
-  ) : (
-    <div className="hidden md:block w-64 shrink-0">
-      {sidebarContent}
-    </div>
   );
-};
+} 

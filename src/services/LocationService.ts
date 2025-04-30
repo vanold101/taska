@@ -158,4 +158,4 @@ export const setTaskCoordinates = (
     coordinates,
     radius
   };
-};
+}; 
